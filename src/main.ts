@@ -1,0 +1,28 @@
+import * as THREE from 'three'
+import DungeonScene from './DungeonScene'
+
+const width = window.innerWidth
+const height = window.innerHeight
+
+const renderer = new THREE.WebGLRenderer({
+	canvas: document.getElementById('app') as HTMLCanvasElement
+})
+renderer.setSize(width, height)
+
+const mainCamera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000)
+
+//set background color as clear
+renderer.setClearColor(0xffffff, 1)
+
+
+const scene = new DungeonScene(mainCamera)
+scene.initialize()
+
+function tick()
+{
+	scene.update()
+	renderer.render(scene, mainCamera)
+	requestAnimationFrame(tick)
+}
+
+tick()

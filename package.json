@@ -14,6 +14,11 @@
     "vite": "^4.2.0"
   },
   "dependencies": {
+    "@hapi/ammo": "^6.0.1",
+    "@types/cannon": "^0.1.8",
+    "@types/node": "^18.15.13",
+    "ammojs-typed": "^1.0.6",
+    "cannon": "^0.6.2",
     "three": "^0.151.3"
   }
 }

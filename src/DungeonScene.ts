@@ -30,6 +30,7 @@ export default class DungeonScene extends THREE.Scene{
 		light.position.set(0, 0, 0)
 		this.add(light)
 
+
         this.map = await this.loadmap()
 
 		//add bounding boxes map
@@ -44,8 +45,8 @@ export default class DungeonScene extends THREE.Scene{
 
     private async loadmap() {
             
-            const map= await this.objLoader.loadAsync('./assets/map.obj')
-    
+            //map is a big plane to be returned
+            const map = new THREE.Object3D()    
             return map
     }
 

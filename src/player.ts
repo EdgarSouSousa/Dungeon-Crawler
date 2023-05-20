@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
+import { AnimationMixer, AnimationAction } from 'three';
 
 interface IPlayerOptions {
   scene: THREE.Scene;
@@ -13,16 +14,22 @@ class Player {
   private camera: THREE.Camera;
   private renderer: THREE.WebGLRenderer;
   private model: THREE.Object3D | null;
+  private animations: THREE.AnimationClip[];
+  private mixer: AnimationMixer | null;
   private controls: PointerLockControls | null;
   private keysPressed: Set<string>;
+  private state: string;
 
   constructor({ scene, camera, renderer }: IPlayerOptions) {
     this.scene = scene;
     this.camera = camera;
     this.renderer = renderer;
     this.model = null;
+    this.animations = [];
+    this.mixer = null;
     this.controls = null;
     this.keysPressed = new Set();
+    this.state = 'Idle';
     this.setupKeyListeners();
   }
 
@@ -44,7 +51,11 @@ class Player {
     const gltf = await loader.loadAsync(url);
     this.model = gltf.scene;
     this.scene.add(this.model);
-    this.model.scale.set(0.008, 0.01, 0.01);
+    this.animations = gltf.animations;
+    this.mixer = new AnimationMixer(this.model);
+    this.scene.add(this.model);
+    this.model.scale.set(0.01, 0.01, 0.01);
+    console.log("Animation names:", this.animations.map(clip => clip.name));
   }
 
   setupControls(): void {
@@ -58,9 +69,43 @@ class Player {
         this.renderer.domElement.requestPointerLock();
       }
     });
+
+     // Set up the mousedown event listener to trigger the attack function
+    this.renderer.domElement.addEventListener("mousedown", (event) => {
+      if (event.button === 0) { // Left mouse button
+        this.attack();
+        //log("Attacking!");
+        console.log("Attacking!");
+      }
+    });
   }
 
-  update(){
+  attack(): void {
+    if (this.mixer && this.state !== 'Attacking') {
+      const attackAnimation = this.animations.find(clip => clip.name === 'Attack');
+      if (attackAnimation) {
+        const action = this.mixer.clipAction(attackAnimation);
+        action.reset();
+        action.play();
+        this.state = 'Attacking';
+        action.clampWhenFinished = true;
+        action.loop = THREE.LoopOnce;
+  
+        // Add an event listener for the 'finished' event on the mixer
+        this.mixer.addEventListener('finished', (e: any) => {
+          // Check if the finished action is the attack action
+          if (e.action === action) {
+            this.state = 'Idle';
+          }
+        });
+      }
+    }
+  }
+  
+  
+  
+
+  update(deltaTime: number): void {
     if (this.model) {
       const moveSpeed = 0.5;
       const direction = new THREE.Vector3();
@@ -94,14 +139,16 @@ class Player {
         this.camera.getWorldDirection(lookAtDirection);
         lookAtDirection.add(this.model.position);
         //default rotation vector of moder
-        const defaultRotation = new THREE.Vector3(0, 0.5, 0);
+        //const defaultRotation = new THREE.Vector3(0, 0.5, 0);
 
         // Update the model's rotation to point towards the pointer lock
-        lookAtDirection.add(defaultRotation);
+        //lookAtDirection.add(defaultRotation);
         this.model.lookAt(lookAtDirection);
 
-        //log the model rotation
-        console.log(this.model.rotation);
+        if (this.mixer) {
+          this.mixer.update(deltaTime);
+        }
+
         }
 
     }

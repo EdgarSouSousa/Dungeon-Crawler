@@ -22,15 +22,20 @@ renderer.setClearColor(0xffffff, 1)
 const scene = new DungeonScene()
 await scene.initialize()
 const player = new Player({ scene , camera: mainCamera, renderer: renderer });
-await player.loadModel('/assets/rigged_arms/scene.gltf');
+await player.loadModel('/assets/Player.glb');
 player.setupControls();
+
+//declare clock
+const clock = new THREE.Clock()
 
 
 
 function tick()
 {
 	scene.update()
-    player.update();
+	const deltaTime = clock.getDelta();
+    player.update(deltaTime);
+		
 	renderer.render(scene, mainCamera)
 	requestAnimationFrame(tick)
 }

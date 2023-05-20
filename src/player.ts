@@ -44,6 +44,7 @@ class Player {
     const gltf = await loader.loadAsync(url);
     this.model = gltf.scene;
     this.scene.add(this.model);
+    this.model.scale.set(0.008, 0.01, 0.01);
   }
 
   setupControls(): void {
@@ -83,7 +84,26 @@ class Player {
       if (this.controls) {
         this.controls.moveRight(direction.x);
         this.controls.moveForward(direction.z);
-      } 
+        // this.model.position.copy(this.controls.getObject().position);
+        this.model.position.x = this.controls.getObject().position.x;
+        this.model.position.y = this.controls.getObject().position.y;
+        this.model.position.z = this.controls.getObject().position.z;
+
+        // Calculate the direction the model should be looking at
+        const lookAtDirection = new THREE.Vector3();
+        this.camera.getWorldDirection(lookAtDirection);
+        lookAtDirection.add(this.model.position);
+        //default rotation vector of moder
+        const defaultRotation = new THREE.Vector3(0, 0.5, 0);
+
+        // Update the model's rotation to point towards the pointer lock
+        lookAtDirection.add(defaultRotation);
+        this.model.lookAt(lookAtDirection);
+
+        //log the model rotation
+        console.log(this.model.rotation);
+        }
+
     }
   }
 }

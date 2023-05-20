@@ -1,0 +1,11 @@
+Model Information:
+* title:	Medieval Shield
+* source:	https://sketchfab.com/3d-models/medieval-shield-b98b8f64d935415aab0fe9b70074511f
+* author:	Artem Mykhailov (https://sketchfab.com/CGArtem)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Medieval Shield" (https://sketchfab.com/3d-models/medieval-shield-b98b8f64d935415aab0fe9b70074511f) by Artem Mykhailov (https://sketchfab.com/CGArtem) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

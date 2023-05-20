@@ -56,6 +56,24 @@ class Player {
     this.scene.add(this.model);
     this.model.scale.set(0.01, 0.01, 0.01);
     console.log("Animation names:", this.animations.map(clip => clip.name));
+    const skinnedMesh = findSkinnedMesh(this.model);
+    if (skinnedMesh && skinnedMesh.skeleton) {
+      // Access the skeleton object and bones
+      const skeleton = skinnedMesh.skeleton;
+      console.log(skeleton);
+      //load the sword
+      const sword = await loader.loadAsync('/assets/sword.glb');
+      const handBone = skeleton.getBoneByName('thumb_01_r_035');
+      if (handBone) {
+        handBone.add(sword.scene);
+        sword.scene.scale.set(4, 4, 4);
+        sword.scene.position.set(-3,0.2, -1);
+        sword.scene.rotation.set(0, -0.5, 0);
+      }
+
+    }
+
+    
   }
 
   setupControls(): void {
@@ -137,14 +155,17 @@ class Player {
         // Calculate the direction the model should be looking at
         const lookAtDirection = new THREE.Vector3();
         this.camera.getWorldDirection(lookAtDirection);
+        //if y value of lookAtDirection not equal to 1 or -1
         lookAtDirection.add(this.model.position);
-        //default rotation vector of moder
-        //const defaultRotation = new THREE.Vector3(0, 0.5, 0);
+        if (lookAtDirection.y !== 1 && lookAtDirection.y !== -1) {
+          this.model.lookAt(lookAtDirection);
+        }
+        
+        
 
         // Update the model's rotation to point towards the pointer lock
         //lookAtDirection.add(defaultRotation);
-        this.model.lookAt(lookAtDirection);
-
+        
         if (this.mixer) {
           this.mixer.update(deltaTime);
         }
@@ -153,6 +174,25 @@ class Player {
 
     }
   }
+  
 }
+
+function findSkinnedMesh(object: THREE.Object3D): THREE.SkinnedMesh | null {
+  if (object instanceof THREE.SkinnedMesh) {
+    return object;
+  }
+
+  for (let i = 0; i < object.children.length; i++) {
+    const result = findSkinnedMesh(object.children[i]);
+    if (result) {
+      return result;
+    }
+  }
+
+  return null;
+}
+
+
+
 
 export default Player;

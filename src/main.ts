@@ -25,7 +25,7 @@ await scene.initialize()
 const player = new Player({ scene , camera: mainCamera, renderer: renderer });
 await player.loadModel('/assets/Player.glb');
 player.setupControls();
-const enemy = new Enemy('/public/assets/zombie.glb',10);
+const enemy = new Enemy('/public/assets/zombie.glb',100);
 await enemy.load();
 enemy.model.position.set(0, 0, 0);
 scene.add(enemy.model);
@@ -53,6 +53,7 @@ function tick()
 	renderer.render(scene, mainCamera)
 	requestAnimationFrame(tick)
 	checkCollisions();
+	checkAttack();
 	enemy.update(deltaTime,playerPosition );
 }
 
@@ -69,31 +70,44 @@ tick()
 		return;
 	}
 	else if (player.colider.intersectsBox(scene.colliders[0]) ){
-			console.log("collision");
 			const playerCosPos = player.controls.getObject().position;
 			player.controls.getObject().position.set(playerCosPos.x, playerCosPos.y, -18);
 		}
 	
 	else if (player.colider.intersectsBox(scene.colliders[1]) ){
-			console.log("collision");
 			const playerCosPos = player.controls.getObject().position;
 			player.controls.getObject().position.set(playerCosPos.x, playerCosPos.y, 12);
 
 	}
 
 	else if (player.colider.intersectsBox(scene.colliders[2]) ){
-			console.log("collision");
 			const playerCosPos = player.controls.getObject().position;
 			player.controls.getObject().position.set(-12, playerCosPos.y, playerCosPos.z);
 	}
 
 	else if (player.colider.intersectsBox(scene.colliders[3]) ){
-			console.log("collision");
 			const playerCosPos = player.controls.getObject().position;
 			player.controls.getObject().position.set(12, playerCosPos.y, playerCosPos.z);
 	}
 
-	  }	
+	}
+
+	function checkAttack(){
+
+		if(!player){
+			return
+		}
+		else if (!player.controls){
+			return;
+		}
+
+		//if player colider is currently intersecting with enemy colider
+		else if ((player.colider.intersectsBox(enemy.boundingBox)) && (player.state === 'Attacking')){
+			console.log("enemy hit");
+			enemy.hp -= 1;
+			console.log(enemy.hp);
+		}
+	}
 
 
 

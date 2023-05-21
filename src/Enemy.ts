@@ -1,19 +1,22 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
+
 export enum EnemyState {
   Idle,
   Chasing,
   Attacking,
+  Dead
 }
 
 export class Enemy {
   public model!: THREE.Object3D;
   private mixer!: THREE.AnimationMixer;
   private animations: { [key: string]: THREE.AnimationAction };
-  private boundingBox!: THREE.Box3;
-  private hp: number;
-  private state: EnemyState; // Add the 'state' property
+  public boundingBox!: THREE.Box3;
+  public hp: number;
+  public state: EnemyState; // Add the 'state' property
+  private removed: boolean = false;
 
   constructor(private url: string, initialHp: number) {
     this.hp = initialHp;
@@ -42,6 +45,10 @@ export class Enemy {
           //log animations
             console.log(this.animations);
 
+          //add bounding box
+          this.boundingBox = new THREE.Box3().setFromObject(this.model);
+
+
 
           resolve(this.model);
         },
@@ -57,6 +64,16 @@ export class Enemy {
     if (this.mixer) {
       this.mixer.update(deltaTime);
     }
+
+    if(this.removed){
+      //delete this.model;
+      this.model.position.set(0, -100, 0);
+    }
+    
+    console.log(this.removed);
+
+    //update colider position
+    this.boundingBox.setFromObject(this.model);
   
     this.updateAI(playerPosition);
   
@@ -83,6 +100,9 @@ export class Enemy {
       case EnemyState.Attacking:
         this.playAnimation('Attack'); 
         break;
+      case EnemyState.Dead:
+        this.playAnimation('FallingBack');
+        break;
         
     }
   }
@@ -100,8 +120,11 @@ export class Enemy {
     // The distance at which the enemy starts chasing the player
     const chaseThreshold = 30;
     const attackThreshold = 5;
-  
-    if ((distanceToPlayer < chaseThreshold) && (distanceToPlayer > attackThreshold)) {
+
+    if (this.hp <= 0) {
+        this.transitionToState(EnemyState.Dead);
+    }
+    else if ((distanceToPlayer < chaseThreshold) && (distanceToPlayer > attackThreshold)) {
       this.transitionToState(EnemyState.Chasing);
     } 
     else if (distanceToPlayer < attackThreshold) {
@@ -136,6 +159,19 @@ export class Enemy {
       case EnemyState.Attacking:
         // Resume the desired animation in the Chasing state
         this.playAnimation('Attack');
+        break;
+      case EnemyState.Dead:
+        // Play the desired animation in the Dead state
+        //pause all animations
+        this.animations['Walk_InPlace'].stop();
+        this.animations['Attack'].stop();
+        this.animations['Idle'].stop();
+        this.playAnimation('FallingBack');
+        //wait for animation to finish
+        setTimeout(() => {
+
+        this.removed = true;
+        }, 1350);
         break;
 
     }

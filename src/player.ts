@@ -18,7 +18,7 @@ class Player {
   private mixer: AnimationMixer | null;
   public controls: PointerLockControls | null;
   private keysPressed: Set<string>;
-  private state: string;
+  public state: string;
   public colider: THREE.Box3;
 
   constructor({ scene, camera, renderer }: IPlayerOptions) {
@@ -75,6 +75,10 @@ class Player {
       //add colider
       const colider = new THREE.Box3().setFromObject(this.model);
       this.colider = colider;
+
+      //add bounding box helper
+      const helper = new THREE.Box3Helper(colider, 0xffff00);
+      this.model.add(helper);
 
     }
 
@@ -166,8 +170,16 @@ class Player {
           this.model.lookAt(lookAtDirection);
         }
 
-        //update colider
+        //calculate the colider
         this.colider.setFromObject(this.model);
+        //move collider forward (z axis)
+        this.colider.expandByScalar(1.4);
+
+        //add bounding box helper
+        const helper = new THREE.Box3Helper(this.colider, 0xffff00);
+        this.model.add(helper);
+
+
         
         
         

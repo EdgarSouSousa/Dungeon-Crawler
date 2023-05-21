@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import Level from './Level'
 import Player from './player';
+import { Enemy, EnemyState } from './Enemy';
 
 
 const width = window.innerWidth
@@ -24,6 +25,11 @@ await scene.initialize()
 const player = new Player({ scene , camera: mainCamera, renderer: renderer });
 await player.loadModel('/assets/Player.glb');
 player.setupControls();
+const enemy = new Enemy('/public/assets/zombie.glb',10);
+await enemy.load();
+enemy.model.position.set(0, 0, 0);
+scene.add(enemy.model);
+
 
 //add light to player
 const light = new THREE.PointLight(0xffffff, 1, 100)
@@ -39,46 +45,27 @@ const clock = new THREE.Clock()
 
 
 function tick()
-{
+{	
+	const playerPosition = player.controls.getObject().position;
 	const deltaTime = clock.getDelta();
     player.update(deltaTime);
 		
 	renderer.render(scene, mainCamera)
 	requestAnimationFrame(tick)
 	checkCollisions();
+	enemy.update(deltaTime,playerPosition );
 }
 
 tick()
-
-function setupCameraControls() {
-	document.addEventListener('keydown', onDocumentKeyDown, false);
-  
-	function onDocumentKeyDown(event: { keyCode: any }) {
-	  const delta = 2;
-	  const keycode = event.keyCode;
-  
-	  switch (keycode) {
-		case 37: // left arrow
-		  mainCamera.position.x -= delta;
-		  break;
-		case 38: // up arrow
-		mainCamera.position.z -= delta;
-		  break;
-		case 39: // right arrow
-		mainCamera.rotation.y += delta/100;
-		  break;
-		case 40: // down arrow
-		mainCamera.position.z += delta;
-		  break;
-	  }
-	}
-  }
 
   function checkCollisions() {
 	//save position of player controls in the moment of collision
 
 
 	if(!player){
+		return;
+	}
+	else if (!player.controls){
 		return;
 	}
 	else if (player.colider.intersectsBox(scene.colliders[0]) ){

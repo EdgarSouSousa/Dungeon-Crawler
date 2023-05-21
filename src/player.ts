@@ -57,7 +57,6 @@ class Player {
     this.mixer = new AnimationMixer(this.model);
     this.scene.add(this.model);
     this.model.scale.set(0.005, 0.005, 0.005);
-    console.log("Animation names:", this.animations.map(clip => clip.name));
     const skinnedMesh = findSkinnedMesh(this.model);
     if (skinnedMesh && skinnedMesh.skeleton) {
       // Access the skeleton object and bones

@@ -30,7 +30,7 @@ export class Enemy {
         this.url,
         (gltf) => {
           this.model = gltf.scene;
-          this.model.scale.set(4, 4, 4);
+          this.model.scale.set(3, 3, 3);
           this.model.position.set(0, 0, 0);
           this.mixer = new THREE.AnimationMixer(this.model);
           this.animations = {};
@@ -61,12 +61,9 @@ export class Enemy {
     this.updateAI(playerPosition);
   
     if (this.state === EnemyState.Chasing) {
-      const lookAtVector = new THREE.Vector3().copy(playerPosition);
+      const lookAtVector = new THREE.Vector3(playerPosition.x, this.model.position.y, playerPosition.z);
       this.model.lookAt(lookAtVector);
-  
-      // Adjust the rotation of the enemy model to face the player
-      //this.model.rotation.y += Math.PI; // If the model is facing the wrong direction, you can adjust this value
-  
+    
       const moveSpeed = 0.05;
       const direction = new THREE.Vector3().subVectors(playerPosition, this.model.position).normalize();
       this.model.position.add(direction.multiplyScalar(moveSpeed));
@@ -78,13 +75,13 @@ export class Enemy {
   setState(state: EnemyState): void {
     switch (state) {
       case EnemyState.Idle:
-        this.playAnimation('Idle'); // Replace with the actual idle animation name
+        this.playAnimation('Idle'); 
         break;
       case EnemyState.Chasing:
-        this.playAnimation('Walk_InPlace'); // Replace with the actual chasing animation name
+        this.playAnimation('Walk_InPlace'); 
         break;
       case EnemyState.Attacking:
-        this.playAnimation('Attack'); // Replace with the actual attacking animation name
+        this.playAnimation('Attack'); 
         break;
         
     }

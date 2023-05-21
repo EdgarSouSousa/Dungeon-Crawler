@@ -13,12 +13,13 @@ class Player {
   private scene: THREE.Scene;
   private camera: THREE.Camera;
   private renderer: THREE.WebGLRenderer;
-  private model: THREE.Object3D | null;
+  public model: THREE.Object3D | null;
   private animations: THREE.AnimationClip[];
   private mixer: AnimationMixer | null;
-  private controls: PointerLockControls | null;
+  public controls: PointerLockControls | null;
   private keysPressed: Set<string>;
   private state: string;
+  public colider: THREE.Box3;
 
   constructor({ scene, camera, renderer }: IPlayerOptions) {
     this.scene = scene;
@@ -31,6 +32,7 @@ class Player {
     this.keysPressed = new Set();
     this.state = 'Idle';
     this.setupKeyListeners();
+    this.colider = new THREE.Box3();
   }
 
   private setupKeyListeners(): void {
@@ -54,7 +56,7 @@ class Player {
     this.animations = gltf.animations;
     this.mixer = new AnimationMixer(this.model);
     this.scene.add(this.model);
-    this.model.scale.set(0.01, 0.01, 0.01);
+    this.model.scale.set(0.005, 0.005, 0.005);
     console.log("Animation names:", this.animations.map(clip => clip.name));
     const skinnedMesh = findSkinnedMesh(this.model);
     if (skinnedMesh && skinnedMesh.skeleton) {
@@ -66,10 +68,14 @@ class Player {
       const handBone = skeleton.getBoneByName('thumb_01_r_035');
       if (handBone) {
         handBone.add(sword.scene);
-        sword.scene.scale.set(4, 4, 4);
-        sword.scene.position.set(-3,0.2, -1);
+        sword.scene.scale.set(3, 3, 3);
+        sword.scene.position.set(-2,0.2, -1);
         sword.scene.rotation.set(0, -0.5, 0);
       }
+
+      //add colider
+      const colider = new THREE.Box3().setFromObject(this.model);
+      this.colider = colider;
 
     }
 
@@ -160,6 +166,10 @@ class Player {
         if (lookAtDirection.y !== 1 && lookAtDirection.y !== -1) {
           this.model.lookAt(lookAtDirection);
         }
+
+        //update colider
+        this.colider.setFromObject(this.model);
+        
         
         
 

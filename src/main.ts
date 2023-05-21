@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import DungeonScene from './DungeonScene'
+import Level from './Level'
 import Player from './player';
 
 
@@ -19,11 +19,19 @@ const mainCamera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000)
 renderer.setClearColor(0xffffff, 1)
 
 
-const scene = new DungeonScene()
+const scene = new Level()
 await scene.initialize()
 const player = new Player({ scene , camera: mainCamera, renderer: renderer });
 await player.loadModel('/assets/Player.glb');
 player.setupControls();
+
+//add light to player
+const light = new THREE.PointLight(0xffffff, 1, 100)
+light.position.set(0, 2, 0)
+if (player.model)
+player.model.add(light)
+
+
 
 //declare clock
 const clock = new THREE.Clock()
@@ -32,12 +40,12 @@ const clock = new THREE.Clock()
 
 function tick()
 {
-	scene.update()
 	const deltaTime = clock.getDelta();
     player.update(deltaTime);
 		
 	renderer.render(scene, mainCamera)
 	requestAnimationFrame(tick)
+	checkCollisions();
 }
 
 tick()
@@ -65,6 +73,40 @@ function setupCameraControls() {
 	  }
 	}
   }
+
+  function checkCollisions() {
+	//save position of player controls in the moment of collision
+
+
+	if(!player){
+		return;
+	}
+	else if (player.colider.intersectsBox(scene.colliders[0]) ){
+			console.log("collision");
+			const playerCosPos = player.controls.getObject().position;
+			player.controls.getObject().position.set(playerCosPos.x, playerCosPos.y, -18);
+		}
+	
+	else if (player.colider.intersectsBox(scene.colliders[1]) ){
+			console.log("collision");
+			const playerCosPos = player.controls.getObject().position;
+			player.controls.getObject().position.set(playerCosPos.x, playerCosPos.y, 12);
+
+	}
+
+	else if (player.colider.intersectsBox(scene.colliders[2]) ){
+			console.log("collision");
+			const playerCosPos = player.controls.getObject().position;
+			player.controls.getObject().position.set(-12, playerCosPos.y, playerCosPos.z);
+	}
+
+	else if (player.colider.intersectsBox(scene.colliders[3]) ){
+			console.log("collision");
+			const playerCosPos = player.controls.getObject().position;
+			player.controls.getObject().position.set(12, playerCosPos.y, playerCosPos.z);
+	}
+
+	  }	
 
 
 

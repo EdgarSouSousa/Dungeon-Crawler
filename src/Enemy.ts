@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 export enum EnemyState {
   Idle,
   Chasing,
+  Attacking,
 }
 
 export class Enemy {
@@ -29,7 +30,8 @@ export class Enemy {
         this.url,
         (gltf) => {
           this.model = gltf.scene;
-          this.model.scale.set(2, 2, 2);
+          this.model.scale.set(4, 4, 4);
+          this.model.position.set(0, 0, 0);
           this.mixer = new THREE.AnimationMixer(this.model);
           this.animations = {};
 
@@ -63,11 +65,12 @@ export class Enemy {
       this.model.lookAt(lookAtVector);
   
       // Adjust the rotation of the enemy model to face the player
-      this.model.rotation.y += Math.PI; // If the model is facing the wrong direction, you can adjust this value
+      //this.model.rotation.y += Math.PI; // If the model is facing the wrong direction, you can adjust this value
   
       const moveSpeed = 0.05;
       const direction = new THREE.Vector3().subVectors(playerPosition, this.model.position).normalize();
       this.model.position.add(direction.multiplyScalar(moveSpeed));
+      this.model.position.y = -4;
     }
   }
 
@@ -75,11 +78,15 @@ export class Enemy {
   setState(state: EnemyState): void {
     switch (state) {
       case EnemyState.Idle:
-        this.playAnimation('idle'); // Replace with the actual idle animation name
+        this.playAnimation('Idle'); // Replace with the actual idle animation name
         break;
       case EnemyState.Chasing:
-        this.playAnimation('run'); // Replace with the actual chasing animation name
+        this.playAnimation('Walk_InPlace'); // Replace with the actual chasing animation name
         break;
+      case EnemyState.Attacking:
+        this.playAnimation('Attack'); // Replace with the actual attacking animation name
+        break;
+        
     }
   }
 
@@ -94,11 +101,17 @@ export class Enemy {
     const distanceToPlayer = this.model.position.distanceTo(playerPosition);
   
     // The distance at which the enemy starts chasing the player
-    const chaseThreshold = 10;
+    const chaseThreshold = 30;
+    const attackThreshold = 5;
   
-    if (distanceToPlayer < chaseThreshold) {
+    if ((distanceToPlayer < chaseThreshold) && (distanceToPlayer > attackThreshold)) {
       this.transitionToState(EnemyState.Chasing);
-    } else {
+    } 
+    else if (distanceToPlayer < attackThreshold) {
+      // Attack the player
+      this.transitionToState(EnemyState.Attacking);
+    }
+    else {
       this.transitionToState(EnemyState.Idle);
     }
   }
@@ -112,16 +125,22 @@ export class Enemy {
   
     switch (this.state) {
       case EnemyState.Idle:
-        // Pause all animations in the Idle state
-        for (const animationName in this.animations) {
-          this.animations[animationName].paused = true;
-        }
+        // Play the desired animation in the Idle state
+        this.playAnimation('idle');
         break;
   
       case EnemyState.Chasing:
         // Resume the desired animation in the Chasing state
-        this.playAnimation('ANIMATION ZOMBIE');
+        this.playAnimation('Walk_InPlace');
+        //pause the attack animation
+        this.animations['Attack'].stop();
         break;
+
+      case EnemyState.Attacking:
+        // Resume the desired animation in the Chasing state
+        this.playAnimation('Attack');
+        break;
+
     }
   }
 }

@@ -1,7 +1,8 @@
 import * as THREE from 'three'
 import Level from './Level'
 import Player from './player';
-import { Enemy, EnemyState } from './Enemy';
+import { Enemy} from './Enemy';
+import Torch from './Torch';
 
 
 const width = window.innerWidth
@@ -29,23 +30,33 @@ const enemy = new Enemy('/public/assets/zombie.glb',100);
 await enemy.load();
 enemy.model.position.set(0, 0, 0);
 scene.add(enemy.model);
+//add torch
+const torch1 = new Torch();
+torch1.model.position.set(0, 0, -19);
+torch1.model.scale.set(0.02, 0.02, 0.02);
+scene.add(torch1.model);
+scene.add(torch1.light);
+torch1.light.position.set(0, 0, -19);
+scene.add(torch1.fireParticles);
+torch1.fireParticles.position.set(0, 0, -19);
 
 
-//add light to player
-const light = new THREE.PointLight(0xffffff, 1, 100)
-light.position.set(0, 2, 0)
-if (player.model)
-player.model.add(light)
 
 
 
 //declare clock
 const clock = new THREE.Clock()
+let Playerlight = new THREE.PointLight(0xffffff, 1, 100)
+scene.add(Playerlight);
+Playerlight.position.set(0, 0, 0);
 
 
-
+			
 function tick()
 {	
+	if (!player.controls){
+		return;
+	}
 	const playerPosition = player.controls.getObject().position;
 	const deltaTime = clock.getDelta();
     player.update(deltaTime);
@@ -55,6 +66,10 @@ function tick()
 	checkCollisions();
 	checkAttack();
 	enemy.update(deltaTime,playerPosition );
+	torch1.update(deltaTime);
+	playrTorchUpdate();
+	console.log(player.state);
+
 }
 
 tick()
@@ -109,5 +124,23 @@ tick()
 		}
 	}
 
+	function playrTorchUpdate() {
+		//if player.controls is not defined, return
+		if (!player.controls) {
+			return;
+		}
+		
 
 
+		if (player.state != 'Torch') {
+		  // Set the light intensity to 0 when the player is not holding the torch
+		  Playerlight.intensity = 0;
+		} else if (player.state === 'Torch') {
+		  // Set the light intensity to a desired value when the player is holding the torch
+		  Playerlight.intensity = 1;
+	  
+		  // Update the light position to match the player's position
+		  const playerPosition = player.controls.getObject().position;
+		  Playerlight.position.set(playerPosition.x, playerPosition.y, playerPosition.z);
+		}
+	  }

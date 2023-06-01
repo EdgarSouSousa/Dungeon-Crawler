@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
-import { AnimationMixer, AnimationAction } from 'three';
+import { AnimationMixer} from 'three';
 
 interface IPlayerOptions {
   scene: THREE.Scene;
@@ -76,10 +76,7 @@ class Player {
       const colider = new THREE.Box3().setFromObject(this.model);
       this.colider = colider;
 
-      //add bounding box helper
-      const helper = new THREE.Box3Helper(colider, 0xffff00);
-      this.model.add(helper);
-
+     
     }
 
     
@@ -137,6 +134,11 @@ class Player {
       const moveSpeed = 0.5;
       const direction = new THREE.Vector3();
 
+      //if q is pressed change state to torch
+      if (this.keysPressed.has("q") || this.keysPressed.has("Q")) {
+        this.state = 'Torch';
+      }
+
       direction.set(0, 0, 0);
       if (this.keysPressed.has("w") || this.keysPressed.has("W")) {
         direction.z += 1;
@@ -174,15 +176,6 @@ class Player {
         this.colider.setFromObject(this.model);
         //move collider forward (z axis)
         this.colider.expandByScalar(1.4);
-
-        //add bounding box helper
-        const helper = new THREE.Box3Helper(this.colider, 0xffff00);
-        this.model.add(helper);
-
-
-        
-        
-        
 
         // Update the model's rotation to point towards the pointer lock
         //lookAtDirection.add(defaultRotation);

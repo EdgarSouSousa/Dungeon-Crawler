@@ -15,7 +15,7 @@ class Level extends THREE.Scene {
     try {
       const wall = await loader.loadAsync('/public/assets/wall.glb');
       wall.scene.traverse((child) => {
-        if (child.isMesh) {
+        if (child instanceof THREE.Mesh) {
           child.castShadow = true;
           child.receiveShadow = true;
         }
@@ -24,7 +24,7 @@ class Level extends THREE.Scene {
       //load floor and ceiling as clone of floor
       const floor = await loader.loadAsync('/public/assets/floor.glb');
       floor.scene.traverse((child) => {
-        if (child.isMesh) {
+        if (child instanceof THREE.Mesh) {
           child.castShadow = true;
           child.receiveShadow = true;
         }
@@ -79,17 +79,7 @@ class Level extends THREE.Scene {
       const wall4Box = new THREE.Box3().setFromObject(wall4);
       this.colliders.push(wall4Box);
 
-      //add box helpers to see the colliders
-      const helper1 = new THREE.Box3Helper(wall1Box, 0xffff00);
-      this.add(helper1);
-      const helper2 = new THREE.Box3Helper(wall2Box, 0xffff00);
-      this.add(helper2);
-      const helper3 = new THREE.Box3Helper(wall3Box, 0xffff00);
-      this.add(helper3);
-      const helper4 = new THREE.Box3Helper(wall4Box, 0xffff00);
-      this.add(helper4);
-
-
+     
     } catch (error) {
       console.error('Error loading map:', error);
     }

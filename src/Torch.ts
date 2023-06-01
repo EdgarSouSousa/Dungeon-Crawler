@@ -2,20 +2,25 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 class Torch {
+  model: THREE.Object3D;
+  light: THREE.PointLight;
+  fireParticles: THREE.Group;
+
   constructor() {
     this.model = new THREE.Object3D();
-    this.light = new THREE.PointLight(0xffa500, 1, 10);
+    this.light = new THREE.PointLight(0xffa500, 1000, 1000);
     this.fireParticles = new THREE.Group();
 
     this.loadModel();
   }
 
-  loadModel() {
+  async loadModel() {
     const loader = new GLTFLoader();
 
-    loader.load('path/to/your/torch.gltf', (gltf) => {
+    
+    loader.load('public/assets/torch.glb', (gltf) => {
       gltf.scene.traverse((child) => {
-        if (child.isMesh) {
+        if (child instanceof THREE.Mesh) {
           child.castShadow = true;
           child.receiveShadow = true;
         }
@@ -31,7 +36,7 @@ class Torch {
     });
   }
 
-  createFireParticles(torchMesh) {
+  createFireParticles(torchMesh: THREE.Object3D) {
     const geometry = new THREE.SphereGeometry(0.1, 8, 8);
     const material = new THREE.MeshBasicMaterial({ color: 0xffa500 });
 
@@ -45,7 +50,7 @@ class Torch {
     this.model.add(this.fireParticles);
   }
 
-  update(deltaTime) {
+  update(deltaTime: number) {
     this.fireParticles.children.forEach((particle, index) => {
       particle.position.y += 0.01 * deltaTime * (index % 5 + 1);
       particle.position.x += 0.005 * deltaTime * (Math.random() - 0.5);
@@ -56,6 +61,9 @@ class Torch {
       }
     });
 
-    this.light.intensity = 1 + 0.1 * Math.sin(Date.now() * 0.005);
+    this.light.intensity = 1 + 0.2 * Math.sin(Date.now() * 0.005);
   }
 }
+
+export default Torch;
+

@@ -42,6 +42,13 @@ export class Enemy {
             this.animations[animation.name] = this.mixer.clipAction(animation);
           });
 
+          gltf.scene.traverse((child) => {
+            if (child instanceof THREE.Mesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+            }
+          });
+
           //log animations
             console.log(this.animations);
 

@@ -22,14 +22,17 @@ renderer.setClearColor(0xffffff, 1)
 
 
 const scene = new Level()
-await scene.initialize()
+scene.initialize()
 const player = new Player({ scene , camera: mainCamera, renderer: renderer });
-await player.loadModel('/assets/Player.glb');
+player.loadModel('/assets/Player.glb');
 player.setupControls();
 const enemy = new Enemy('/public/assets/zombie.glb',100);
-await enemy.load();
-enemy.model.position.set(0, 0, 0);
-scene.add(enemy.model);
+enemy.load();
+//load enemy then add to scene after 2 seconds
+setTimeout(() => {
+	scene.add(enemy.model);
+}, 2000);
+
 //add torch
 const torch1 = new Torch();
 torch1.model.position.set(0, 0, -19);
